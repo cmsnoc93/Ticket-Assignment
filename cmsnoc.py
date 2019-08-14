@@ -4,7 +4,7 @@ from pymongo import MongoClient
 import json
 import urllib
 import threading,jinja2
-# pip install dnspython required to reach resolve mongo IP
+# pip install dnspython required to resolve mongo IP
 
 mongo = MongoClient('mongodb+srv://cmsnoc93:'+ urllib.parse.quote('cmsnoc@123') + '@cluster0-qxw77.mongodb.net/test?retryWrites=true&w=majority')
 db = mongo.CMS_Automation
