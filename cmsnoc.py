@@ -17,8 +17,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import pdfkit,codecs
 from bson import ObjectId
 from pymongo import MongoClient
-from bson.binary import Binary
-from bson.json_util import dumps
 import json
 import urllib
 #import win32api
