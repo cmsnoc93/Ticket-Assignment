@@ -32,6 +32,7 @@ def login():
         if (request.form['username'] in m.keys()):
             if (m[request.form['username']] == request.form['password']):
                 session['logged_in'] = True
+                session['role'] = request.form['role']
                 session['username'] = request.form['username']
                 if shift_det.count() == 0:
                     engineers = {}
@@ -86,6 +87,14 @@ def logout():
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    #collection.insert({'student_id': 12345})
-    print(datetime.datetime.today().strftime('%d-%m-%Y %p'))
-    return "Hi  " + session['username'] + "<form action = 'logout' method = 'get'><input type='submit' value = 'Logout'/></form>"
+    #print(datetime.datetime.today().strftime('%d-%m-%Y %p'))
+    time = ''
+    if datetime.datetime.today().strftime('%p') == 'AM':
+        time = 'Morning'
+    elif datetime.datetime.today().strftime('%p') == 'PM':
+        time = 'Night'
+    shift_details = collection.find({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 0})
+    if session['role']=='SL':
+        http_response = render_template('index.html', shift_info=shift_details)
+        return http_response
+    return "Hi  " + session['username'] + " " + session['role'] + "<form action = 'logout' method = 'get'><input type='submit' value = 'Logout'/></form>"
