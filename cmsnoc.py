@@ -1,29 +1,11 @@
-from flask import Flask,render_template,make_response,request,redirect,url_for,Response,flash,session,abort,g
+from flask import Flask,render_template,request,redirect,url_for,Response,session,flash
 from flask_mail import Mail,Message
-import flask
-from io import StringIO
-from functools import wraps
-import urllib.parse
-import random,os,subprocess,sys
-import platform
-import datetime
-import urllib.request
-import urllib.parse
-from twilio.rest import Client
-import time
-import atexit
-import logging
-from apscheduler.schedulers.background import BackgroundScheduler
-import pdfkit,codecs
-from bson import ObjectId
 from pymongo import MongoClient
 import json
 import urllib
-#import win32api
-#from email.mime.base import MIMEBase
-from flask_mail import Mail,Message
-from bson import json_util
+import datetime
 import threading,jinja2
+# pip install dnspython required to resolve mongo IP
 
 mongo = MongoClient('mongodb+srv://cmsnoc93:'+ urllib.parse.quote('cmsnoc@123') + '@cluster0-qxw77.mongodb.net/test?retryWrites=true&w=majority')
 db = mongo.CMS_Automation
@@ -93,7 +75,8 @@ def logout():
     engineers = {}
     for i in shift_det:
         engineers = i['engineers']
-    del engineers[username]
+    if engineers[username]:
+        del engineers[username]
     myquery = {"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 0}
     newvalues = {"$set": {"engineers": engineers}}
     collection.update_one(myquery, newvalues)
