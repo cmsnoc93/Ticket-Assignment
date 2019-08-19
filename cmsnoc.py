@@ -23,45 +23,49 @@ def login():
     elif datetime.datetime.today().strftime('%p') == 'PM':
         time = 'Night'
     shift_det = collection.find({"date":datetime.datetime.today().strftime('%d-%m-%Y'),'shift':time,'freeze':0})
-
+    shift_freeze = collection.find({"date":datetime.datetime.today().strftime('%d-%m-%Y'),'shift':time,'freeze':1})
     for l in login_det:
         m[l['username']] = l['password']
     if request.method == 'GET':
         return render_template('login.html')
     if request.method == 'POST':
-        if (request.form['username'] in m.keys()):
-            if (m[request.form['username']] == request.form['password']):
-                session['logged_in'] = True
-                session['role'] = request.form['role']
-                session['username'] = request.form['username']
-                if shift_det.count() == 0:
-                    engineers = {}
-                    engineers[request.form['username']] = dict()
-                    engineers[request.form['username']]['name'] = request.form['username']
-                    engineers[request.form['username']]['role'] = request.form['role']
-                    engineers[request.form['username']]['cases'] = []
-                    engineers[request.form['username']]['leave'] = 0
-                    print(engineers)
-                    collection.insert({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'engineers':engineers, 'freeze':0})
-                elif shift_det.count()>0:
-                    engineers = {}
-                    for i in shift_det:
-                        engineers = i['engineers']
-                    engineers[request.form['username']] = dict()
-                    engineers[request.form['username']]['name'] = request.form['username']
-                    engineers[request.form['username']]['role'] = request.form['role']
-                    engineers[request.form['username']]['cases'] = []
-                    engineers[request.form['username']]['leave'] = 0
-                    myquery = {"date":datetime.datetime.today().strftime('%d-%m-%Y'),'shift':time,'freeze':0}
-                    newvalues = {"$set": {"engineers":engineers}}
-                    collection.update_one(myquery,newvalues)
-                return redirect(url_for('test'))# function name not endpoint name
+        if shift_freeze.count() > 0:
+            flash("Login Duration Expired", 'log_msg')
+            return redirect(url_for('login'))
+        elif shift_freeze.count() == 0:
+            if (request.form['username'] in m.keys()):
+                if (m[request.form['username']] == request.form['password']):
+                    session['logged_in'] = True
+                    session['role'] = request.form['role']
+                    session['username'] = request.form['username']
+                    if shift_det.count() == 0:
+                        engineers = {}
+                        engineers[request.form['username']] = dict()
+                        engineers[request.form['username']]['name'] = request.form['username']
+                        engineers[request.form['username']]['role'] = request.form['role']
+                        engineers[request.form['username']]['cases'] = []
+                        engineers[request.form['username']]['leave'] = 0
+                        print(engineers)
+                        collection.insert({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'engineers':engineers, 'freeze':0})
+                    elif shift_det.count()>0:
+                        engineers = {}
+                        for i in shift_det:
+                            engineers = i['engineers']
+                        engineers[request.form['username']] = dict()
+                        engineers[request.form['username']]['name'] = request.form['username']
+                        engineers[request.form['username']]['role'] = request.form['role']
+                        engineers[request.form['username']]['cases'] = []
+                        engineers[request.form['username']]['leave'] = 0
+                        myquery = {"date":datetime.datetime.today().strftime('%d-%m-%Y'),'shift':time,'freeze':0}
+                        newvalues = {"$set": {"engineers":engineers}}
+                        collection.update_one(myquery,newvalues)
+                    return redirect(url_for('test'))# function name not endpoint name
+                else:
+                    flash("Invalid Password", 'log_msg')
+                    return redirect(url_for('login'))
             else:
-                flash("Invalid Password", 'log_msg')
-                return redirect(url_for('login'))
-        else:
-            error = "Invalid Credentials"
-            flash(error, 'log_msg')
+                error = "Invalid Credentials"
+                flash(error, 'log_msg')
     return redirect(url_for('login'))  # function name of the /attendance ednpoint
 
 @app.route('/logout',methods=['GET'])
