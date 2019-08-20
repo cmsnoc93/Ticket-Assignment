@@ -77,9 +77,13 @@ def logout():
         time = 'Night'
     username = session['username']
     shift_det = collection.find({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 0})
+    shift_freeze = collection.find({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 1})
+    if shift_freeze.count()>0:
+        return redirect(url_for('test'))
     engineers = {}
     for i in shift_det:
         engineers = i['engineers']
+    print(engineers)
     if engineers[username]:
         del engineers[username]
     myquery = {"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 0}
@@ -93,12 +97,34 @@ def logout():
 def test():
     #print(datetime.datetime.today().strftime('%d-%m-%Y %p'))
     time = ''
+    x= ''
     if datetime.datetime.today().strftime('%p') == 'AM':
         time = 'Morning'
     elif datetime.datetime.today().strftime('%p') == 'PM':
         time = 'Night'
-    shift_details = collection.find({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 0})
+    shift_details = collection.find({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time})
+    for i in shift_details:
+        x = i['freeze']
+    shift_details.rewind()
     if session['role']=='SL':
-        http_response = render_template('index.html', shift_info=shift_details)
+        http_response = render_template('index.html', shift_info=shift_details,freeze=x)
         return http_response
     return "Hi  " + session['username'] + " " + session['role'] + "<form action = 'logout' method = 'get'><input type='submit' value = 'Logout'/></form>"
+
+@app.route('/freeze', methods=['GET', 'POST'])
+def freeze():
+    time = ''
+    if datetime.datetime.today().strftime('%p') == 'AM':
+        time = 'Morning'
+    elif datetime.datetime.today().strftime('%p') == 'PM':
+        time = 'Night'
+    myquery = {"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 0}
+    newvalues = {"$set": {"freeze": 1}}
+    collection.update_one(myquery, newvalues)
+    return redirect(url_for('test'))
+
+@app.route('/remsess', methods=['GET', 'POST'])
+def remsess():
+    session['logged_in'] = False
+    flash(u'You were successfully logged  out!', 'log_msg')
+    return login()

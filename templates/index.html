@@ -22,7 +22,10 @@
    </head>
   
 <body>
+    {% if freeze == 0  %}
         <div style="float: right;"><form action = 'logout' method = 'get'><input type='submit' value = 'Logout'/></form></div>
+    {%endif%}
+
 <div class="container">
         <div class="row">
                 <div class="col-md-12">
@@ -46,8 +49,7 @@
                                     <tr>
                                             <td class="highrow text-center">{{item['engineers'][value]['name']}}</td>
                                             <td class="highrow text-center">{{item['engineers'][value]['role']}}</td>
-                                        
-                                        </tr>  
+                                    </tr>  
                                         {% endfor %}       
                                 {% endfor %}   
                             </tbody>
@@ -56,6 +58,10 @@
                         </table>
                         </div>
                         </div>
+                    <div style="float: right;"><form id='FreeezeId' action = 'freeze' method = 'post'>
+                        <button onclick ="freeze()" class="btn btn-success" >Freeze</button>
+                    </form>
+                </div>
                 </div>
                 </div>
                 </div>
@@ -74,4 +80,16 @@
         ]
   });
     });
+
+    function freeze(){
+    if (confirm("Are your sure to Freeze? This action is irreverisble")){
+        $('#FreeezeId').submit();
+    }
+    else{
+        $("#FreezeId").submit(function(e){
+                e.preventDefault(e);
+            });
+    }
+    
+}
 </script>
