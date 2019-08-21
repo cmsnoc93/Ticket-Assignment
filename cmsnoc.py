@@ -79,7 +79,9 @@ def logout():
     shift_det = collection.find({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 0})
     shift_freeze = collection.find({"date": datetime.datetime.today().strftime('%d-%m-%Y'), 'shift': time, 'freeze': 1})
     if shift_freeze.count()>0:
-        return redirect(url_for('test'))
+        session['logged_in'] = False
+        return login()
+        # return redirect(url_for('test'))
     engineers = {}
     for i in shift_det:
         engineers = i['engineers']
@@ -127,4 +129,10 @@ def freeze():
 def remsess():
     session['logged_in'] = False
     flash(u'You were successfully logged  out!', 'log_msg')
+    return login()
+
+@app.route('/clearall',methods=['GET','POST'])
+def clearall():
+    print(session)
+    #session.clear()
     return login()
